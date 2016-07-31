@@ -23,10 +23,10 @@ import java.util.Map;
  * @author lwei
  *
  */
-public final class SQLRunner {
+public final class SQLExecutor  {
 	private static DataConverter<?> converter;
 	
-	public SQLRunner(){
+	public SQLExecutor(){
 		
 	}
 	
