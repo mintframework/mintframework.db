@@ -91,7 +91,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public int update(Connection conn, String sql, Object... params) throws SQLException {
-		if(params == null || params.length == 0) return update(conn, sql);
+		if(params == null || params.length == 0) {
+			return update(conn, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		try {
@@ -193,7 +195,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public <T> T selectBean(Connection connection, Class<T> beanClass, Map<String, String> columnFieldMap, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectBean(connection, beanClass, columnFieldMap, sql);
+		if(params == null || params.length == 0) {
+			return selectBean(connection, beanClass, columnFieldMap, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -268,7 +272,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public ResultMap selectMap(Connection connection, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectMap(connection, sql);
+		if(params == null || params.length == 0) {
+			return selectMap(connection, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -315,7 +321,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public List<ResultMap> selectResultMapList(Connection connection, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectResultMapList(connection, sql);
+		if(params == null || params.length == 0) {
+			return selectResultMapList(connection, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -366,7 +374,9 @@ public final class SQLExecutor  {
 			throw new RuntimeException("keyColumn　can not be empty");
 		}
 		
-		if(params == null || params.length == 0) return selectResultMapMap(connection, keyColumn, sql);
+		if(params == null || params.length == 0) {
+			return selectResultMapMap(connection, keyColumn, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
