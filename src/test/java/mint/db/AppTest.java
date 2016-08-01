@@ -35,7 +35,6 @@ public class AppTest {
 	 * 插入数据
 	 * @throws SQLException
 	 */
-	@Test
 	public void insert() throws SQLException{
 		Connection connection = connectionPool.getConnection();
 		
@@ -53,7 +52,6 @@ public class AppTest {
 	 * 数据库字段名->类字段名
 	 * @throws SQLException
 	 */
-	@Test
 	public void queryBeanList() throws SQLException{
 		SQLExecutor runner = new SQLExecutor();
 		
@@ -80,7 +78,6 @@ public class AppTest {
 	 * 当类的字段名和数据库对应字段名不同时，需要一个map生命他们之间映射关系
 	 * @throws SQLException
 	 */
-	@Test
 	public void queryBean() throws SQLException{
 		SQLExecutor runner = new SQLExecutor();
 		
@@ -101,7 +98,6 @@ public class AppTest {
 	 * 查询单个字段
 	 * @throws SQLException
 	 */
-	@Test
 	public void queryScalar() throws SQLException{
 		SQLExecutor runner = new SQLExecutor();
 		
@@ -117,7 +113,6 @@ public class AppTest {
 	 * 事务
 	 * @throws SQLException
 	 */
-	@Test
 	public void testTransaction() throws SQLException{
 		Connection conn = connectionPool.getConnection();
 		Transaction trans = Transaction.startTransaction(conn);
