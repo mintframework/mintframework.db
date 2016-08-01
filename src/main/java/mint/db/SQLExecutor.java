@@ -106,53 +106,6 @@ public final class SQLExecutor  {
 	}
 	
 	/**
-	 * 线程安全。<br/>
-	 * 查询结果并封装成对象
-	 * @param conn
-	 * @param sql
-	 * @param handler 结果处理器
-	 * @return
-	 * @throws SQLException
-	 */
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> handler) throws SQLException{
-		Statement stm = null;
-		try{
-			stm = conn.createStatement();
-			ResultSet result = stm.executeQuery(sql);
-			
-			return handler.handle(result);
-		} catch(SQLException e) {
-			throw e;
-		} finally {
-			closeStm(stm);
-		}
-	}
-	
-	/**
-	 * 线程安全。<br/>
-	 * 查询结果并封装成对象
-	 * @param conn
-	 * @param beanClass
-	 * @param handler 结果处理器。把查询结果封装成对象
-	 * @param params
-	 * @throws SQLException 
-	 */
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> handler, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return query(conn, sql, handler);
-		
-		PreparedStatement pstm = null;
-		try {
-			pstm = conn.prepareStatement(sql);
-			fillStatement(pstm, params, conn);
-			return handler.handle(pstm.executeQuery());
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			closeStm(pstm);
-		}
-	}
-	
-	/**
 	 * 设置prepareStatement的参数
 	 * @param pstm
 	 * @param params 查询参数
