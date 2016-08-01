@@ -23,7 +23,7 @@ public class DataConverterProvider {
 	 * @param converter
 	 */
 	public static void setConverter(DataConverter<?> converter) {
-		SQLRunner.setConverter(converter);
+		SQLExecutor.setConverter(converter);
 		BeanConverter.setDataConverter(converter);
 		DataConverterProvider.converter = converter;
 	}

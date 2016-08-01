@@ -203,7 +203,7 @@ public final class SQLExecutor  {
 	}
 
 	protected static void setConverter(DataConverter<?> converter) {
-		SQLRunner.converter = converter;
+		SQLExecutor.converter = converter;
 	}
 	
 	/**

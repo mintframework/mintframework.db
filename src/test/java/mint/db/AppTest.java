@@ -11,19 +11,15 @@ import org.junit.Test;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
-import junit.framework.TestCase;
+import mint.db.MiniConnectionPool;
+import mint.db.SQLExecutor;
+import mint.db.Transaction;
 import mint.db.bean.User;
-import mint.db.handler.BeanHandler;
-import mint.db.handler.BeanListHandler;
-import mint.db.handler.ScalarHandler;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest extends TestCase {
+public class AppTest {
 	private static MiniConnectionPool connectionPool;
 
-	static{
+	static {
 		MysqlConnectionPoolDataSource dataSource;
 		dataSource = new MysqlConnectionPoolDataSource();
 		dataSource.setUser("root");
@@ -31,9 +27,6 @@ public class AppTest extends TestCase {
 		dataSource.setServerName("localhost");
 		dataSource.setPort(3306);
 		dataSource.setDatabaseName("jdbc");
-		dataSource.setCharacterEncoding("utf8");
-		dataSource.setNoAccessToProcedureBodies(true);
-		
 		/*三个参数分别是：数据源、最大连接数和获取连接的超时时间（单位是秒）*/
 		connectionPool = new MiniConnectionPool(dataSource, 20, 120);
 	}
@@ -46,34 +39,12 @@ public class AppTest extends TestCase {
 	public void insert() throws SQLException{
 		Connection connection = connectionPool.getConnection();
 		
-		SQLRunner runner = new SQLRunner(connection);
+		SQLExecutor runner = new SQLExecutor();
 		String sql = "insert into user(id, username, password, update_time) values(?,?,?,?)";
-		runner.update(sql, 1, "水牛叔叔", "nooneknows", new Date().getTime());
+		runner.update(connection, sql, 1, "水牛叔叔", "nooneknows", new Date().getTime());
 		
 		/*所有的connection都需要自己关闭*/
 		connection.close();
-	}
-	
-	/**
-	 * 批量执行语句。
-	 * @throws SQLException
-	 */
-	@Test
-	public void batch() throws SQLException{
-		SQLRunner runner = new SQLRunner();
-		
-		String sql = "insert into user (id, username) values (?,?)";
-		
-		Object[][] ps = new Object[3][];
-		ps[0] = new Object[]{2, "宫崎骏"};
-		ps[1] = new Object[]{3, "久石让"};
-		ps[2] = new Object[]{4, "千寻"};
-		
-		Connection conn = connectionPool.getConnection();
-		
-		runner.batch(conn, sql, ps);
-		
-		conn.close();
 	}
 	
 	/**
@@ -83,8 +54,8 @@ public class AppTest extends TestCase {
 	 * @throws SQLException
 	 */
 	@Test
-	public void queryList() throws SQLException{
-		SQLRunner runner = new SQLRunner();
+	public void queryBeanList() throws SQLException{
+		SQLExecutor runner = new SQLExecutor();
 		
 		String sql = "select * from user limit 0, 1000";
 		
@@ -95,7 +66,7 @@ public class AppTest extends TestCase {
 		map.put("create_time", "createTime");
 		
 		Connection connection = connectionPool.getConnection();
-		List<User> users = runner.query(connection, sql, new BeanListHandler<User>(User.class, map));
+		List<User> users = runner.selectBeanList(connection, User.class, null, sql);
 		
 		for(User u : users){
 			System.out.println(u.getUsername());
@@ -111,7 +82,7 @@ public class AppTest extends TestCase {
 	 */
 	@Test
 	public void queryBean() throws SQLException{
-		SQLRunner runner = new SQLRunner();
+		SQLExecutor runner = new SQLExecutor();
 		
 		String sql = "select * from user limit 0, 100";
 		
@@ -119,7 +90,7 @@ public class AppTest extends TestCase {
 		map.put("create_time", "createTime");
 		
 		Connection connection = connectionPool.getConnection();
-		User user = runner.query(connection, sql, new BeanHandler<User>(User.class, map));
+		User user = runner.selectBean(connection, User.class, null, sql);
 		
 		System.out.println(user.getUsername());
 		
@@ -132,11 +103,11 @@ public class AppTest extends TestCase {
 	 */
 	@Test
 	public void queryScalar() throws SQLException{
-		SQLRunner runner = new SQLRunner();
+		SQLExecutor runner = new SQLExecutor();
 		
 		String sql = "select count(id) from user";
 		Connection connection = connectionPool.getConnection();
-		String count = runner.query(connection, sql, new ScalarHandler<String>(String.class));
+		Integer count = runner.selectScalar(connection, Integer.class, sql);
 		
 		System.out.println(count);
 		connection.close();

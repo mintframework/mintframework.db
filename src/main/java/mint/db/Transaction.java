@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mint.db.SQLRunner;
-
 /** 
  * 事务支持的封装
  * @author LiangWei(895925636@qq.com)
@@ -123,8 +121,8 @@ public class Transaction {
 		return this.conn;
 	}
 	
-	private SQLRunner addAllItems() throws SQLException{
-		SQLRunner runner = new SQLRunner();
+	private SQLExecutor addAllItems() throws SQLException{
+		SQLExecutor runner = new SQLExecutor();
 		for(TransactionItem item : items){
 			if((item.params == null || item.params instanceof Object[]) && !(item.params instanceof Object[][])){
 				runner.update(conn, item.sql, (Object[])item.params);
