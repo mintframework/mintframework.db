@@ -222,13 +222,12 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return BeanConverter.toBean(beanClass, result, columnFieldMap);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
-		
-		return BeanConverter.toBean(beanClass, result, columnFieldMap);
 	}
 	
 	/**
@@ -276,13 +275,13 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery();
+			return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
 		} catch (SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
 		
-		return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
 	}
 	
 	/**
@@ -299,13 +298,13 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
 		
-		return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
 	}
 	
 	/**
@@ -324,13 +323,13 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery();
+			return createMap(result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
 		
-		return createMap(result);
 	}
 	
 	/**
@@ -345,13 +344,13 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return createMap(result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
 		
-		return createMap(result);
 	}
 	
 	
@@ -372,13 +371,13 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery(sql);
+			return createMapList(result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
 		
-		return createMapList(result);
 	}
 	
 	/**
@@ -393,13 +392,13 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return createMapList(result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
 		
-		return createMapList(result);
 	}
 	
 	/**
@@ -423,13 +422,13 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery(sql);
+			return createMapMap(keyColumn, result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
 		
-		return createMapMap(keyColumn, result);
 	}
 	
 	/**
@@ -445,13 +444,13 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return createMapMap(keyColumn, result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
 		
-		return createMapMap(keyColumn, result);
 	}
 	
 	/**
@@ -472,13 +471,13 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery(sql);
+			return createScalar(clazz, result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
 		
-		return createScalar(clazz, result);
 	}
 	
 	/**
@@ -494,13 +493,13 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
+			return createScalar(clazz, result);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
 			closeStm(stm);
 		}
 		
-		return createScalar(clazz, result);
 	}
 	
 	/**
