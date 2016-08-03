@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +74,6 @@ public final class SQLExecutor  {
 		Statement stm = null;
 		try {
 			stm = conn.createStatement();
-			
 			return stm.executeUpdate(sql);
 		} catch (SQLException e) {
 			throw e;
@@ -105,60 +105,6 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(pstm);
 		}
-	}
-	
-	/**
-	 * 设置prepareStatement的参数
-	 * @param pstm
-	 * @param params 查询参数
-	 * @throws SQLException
-	 */
-	private void fillStatement(PreparedStatement pstm, Object[] params, Connection connection) throws SQLException {
-		if(params == null || params.length == 0) return;
-		
-		Object value;
-		for(int i=0, len=params.length; i<len; i++){
-			value = params[i];
-			
-			if(value instanceof String){
-				pstm.setString(i+1, (String) value);
-			} else if(value instanceof Integer) {
-				pstm.setInt(i+1, (int) value);
-				
-			} else if(value instanceof Long) {
-				pstm.setLong(i+1, (long) value);
-				
-			} else if(value instanceof Double) {
-				pstm.setDouble(i+1, (double) value);
-				
-			} else if(value instanceof Boolean){
-				pstm.setBoolean(i+1, (Boolean) value);
-				
-			} else if(value instanceof Float){
-				pstm.setFloat(i+1, (float) value);
-				
-			} else if(value instanceof Short){
-				pstm.setShort(i+1, (short) value);
-				
-			} else if(value instanceof Byte){
-				pstm.setShort(i+1, (short) value);
-				
-			} else if(converter != null){
-				pstm.setObject(i+1, converter.fieldToColumn(value, connection));
-				
-			} else {
-				pstm.setObject(i+1, value);
-			}
-		}
-	}
-	
-	private void closeStm(Statement stm) throws SQLException{
-		if(stm == null) return;
-		stm.close();
-	}
-
-	protected static void setConverter(DataConverter<?> converter) {
-		SQLExecutor.converter = converter;
 	}
 	
 	/**
@@ -464,7 +410,54 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(stm);
 		}
+	}
+	
+	/**
+	 * @param connection
+	 * @param clazz
+	 * @param sql
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	public <T> List<T> selectScalarList(Connection connection, Class<T> clazz, String sql, Object... params) throws SQLException{
+		if(params == null || params.length == 0) return selectScalarList(connection, clazz, sql);
 		
+		PreparedStatement pstm = null;
+		ResultSet result = null;
+		
+		try{
+			pstm = connection.prepareStatement(sql);
+			fillStatement(pstm, params, connection);
+			result = pstm.executeQuery();
+			return createScalarList(clazz, result);
+		} catch(SQLException e) {
+			throw e;
+		} finally {
+			closeStm(pstm);
+		}
+		
+	}
+	
+	/**
+	 * @param connection
+	 * @param clazz
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	public <T> List<T> selectScalarList(Connection connection, Class<T> clazz, String sql) throws SQLException{
+		Statement stm = null;
+		ResultSet result = null;
+		try{
+			stm = connection.createStatement();
+			result = stm.executeQuery(sql);
+			return createScalarList(clazz, result);
+		} catch(SQLException e) {
+			throw e;
+		} finally {
+			closeStm(stm);
+		}
 	}
 	
 	/**
@@ -594,5 +587,123 @@ public final class SQLExecutor  {
 			}
 		}
 		return t;
+	}
+	
+	/**
+	 * @param type
+	 * @param result
+	 * @return
+	 * @throws SQLException
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> List<T> createScalarList(Class<T> type, ResultSet result) throws SQLException {
+		
+		if(result.next()){		
+			List<T> ts = new LinkedList<T>();
+			
+			if (type.equals(String.class)) {
+				do {
+					ts.add((T) result.getString(1));
+				} while(result.next());
+			} else if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
+				do {
+					ts.add((T) Integer.valueOf(result.getInt(1)));
+				} while(result.next());
+			} else if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
+				do {
+					ts.add((T) Boolean.valueOf(result.getBoolean(1)));
+				} while(result.next());
+			} else if (type.equals(Long.TYPE) || type.equals(Long.class)) {
+				do {
+					ts.add((T) Long.valueOf(result.getLong(1)));
+				} while(result.next());
+			} else if (type.equals(Double.TYPE) || type.equals(Double.class)) {
+				do {
+					ts.add((T) Double.valueOf(result.getDouble(1)));
+				} while(result.next());
+			} else if (type.equals(Float.TYPE) || type.equals(Float.class)) {
+				do {
+					ts.add((T) Float.valueOf(result.getFloat(1)));
+				} while(result.next());
+			} else if (type.equals(Short.TYPE) || type.equals(Short.class)) {
+				do {
+					ts.add((T) Short.valueOf(result.getShort(1)));
+				} while(result.next());
+			} else if(type.equals(Boolean.class) || type.equals(Boolean.TYPE)){
+				do {
+					ts.add((T) Boolean.valueOf(result.getBoolean(1)));
+				} while(result.next());
+			} else if (type.equals(Byte.TYPE) || type.equals(Byte.class)) {
+				do {
+					ts.add((T) Byte.valueOf(result.getByte(1)));
+				} while(result.next());
+			
+			} else if(DataConverterProvider.getConverter() != null){
+				do {
+					ts.add((T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1), 1, result));
+				} while(result.next());
+			} else {
+				do {
+					ts.add((T) result.getObject(1));
+				} while(result.next());
+			}
+			return ts;
+		}
+		
+		return null;
+	}
+
+	/**
+	 * 设置prepareStatement的参数
+	 * @param pstm
+	 * @param params 查询参数
+	 * @throws SQLException
+	 */
+	private void fillStatement(PreparedStatement pstm, Object[] params, Connection connection) throws SQLException {
+		if(params == null || params.length == 0) return;
+		
+		Object value;
+		for(int i=0, len=params.length; i<len; i++){
+			value = params[i];
+			
+			if(value instanceof String){
+				pstm.setString(i+1, (String) value);
+			} else if(value instanceof Integer) {
+				pstm.setInt(i+1, (int) value);
+				
+			} else if(value instanceof Long) {
+				pstm.setLong(i+1, (long) value);
+				
+			} else if(value instanceof Double) {
+				pstm.setDouble(i+1, (double) value);
+				
+			} else if(value instanceof Boolean){
+				pstm.setBoolean(i+1, (Boolean) value);
+				
+			} else if(value instanceof Float){
+				pstm.setFloat(i+1, (float) value);
+				
+			} else if(value instanceof Short){
+				pstm.setShort(i+1, (short) value);
+				
+			} else if(value instanceof Byte){
+				pstm.setShort(i+1, (short) value);
+				
+			} else if(converter != null){
+				pstm.setObject(i+1, converter.fieldToColumn(value, connection));
+				
+			} else {
+				pstm.setObject(i+1, value);
+			}
+		}
+	}
+	
+	private void closeStm(Statement stm) throws SQLException{
+		if(stm == null) return;
+		stm.close();
+	}
+
+	protected static void setConverter(DataConverter<?> converter) {
+		SQLExecutor.converter = converter;
 	}
 }
