@@ -325,6 +325,8 @@ public final class SQLExecutor  {
 			return selectResultMapList(connection, sql);
 		}
 		
+		System.out.println(params.length);
+		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
 		
