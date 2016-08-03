@@ -364,6 +364,8 @@ public final class SQLExecutor  {
 	public List<ResultMap> selectResultMapList(Connection connection, String sql, Object... params) throws SQLException{
 		if(params == null || params.length == 0) return selectResultMapList(connection, sql);
 		
+		System.out.println(params.length);
+		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
 		
