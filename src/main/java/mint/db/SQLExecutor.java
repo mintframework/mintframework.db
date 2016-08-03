@@ -271,9 +271,9 @@ public final class SQLExecutor  {
 	 * @return
 	 * @throws SQLException
 	 */
-	public ResultMap selectMap(Connection connection, String sql, Object... params) throws SQLException{
+	public ResultMap selectResultMap(Connection connection, String sql, Object... params) throws SQLException{
 		if(params == null || params.length == 0) {
-			return selectMap(connection, sql);
+			return selectResultMap(connection, sql);
 		}
 		
 		PreparedStatement pstm = null;
@@ -297,7 +297,7 @@ public final class SQLExecutor  {
 	 * @return
 	 * @throws SQLException
 	 */
-	public ResultMap selectMap(Connection connection, String sql) throws SQLException{
+	public ResultMap selectResultMap(Connection connection, String sql) throws SQLException{
 		Statement stm = null;
 		ResultSet result = null;
 		try{
@@ -331,7 +331,7 @@ public final class SQLExecutor  {
 		try{
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
-			result = pstm.executeQuery(sql);
+			result = pstm.executeQuery();
 			return createMapList(result);
 		} catch(SQLException e) {
 			throw e;
@@ -384,7 +384,7 @@ public final class SQLExecutor  {
 		try{
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
-			result = pstm.executeQuery(sql);
+			result = pstm.executeQuery();
 			return createMapMap(keyColumn, result);
 		} catch(SQLException e) {
 			throw e;
@@ -433,7 +433,7 @@ public final class SQLExecutor  {
 		try{
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
-			result = pstm.executeQuery(sql);
+			result = pstm.executeQuery();
 			return createScalar(clazz, result);
 		} catch(SQLException e) {
 			throw e;
