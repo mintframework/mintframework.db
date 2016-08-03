@@ -91,60 +91,15 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public int update(Connection conn, String sql, Object... params) throws SQLException {
-		if(params == null || params.length == 0) return update(conn, sql);
+		if(params == null || params.length == 0) {
+			return update(conn, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		try {
 			pstm = conn.prepareStatement(sql);
 			fillStatement(pstm, params, conn);
 			return pstm.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			closeStm(pstm);
-		}
-	}
-	
-	/**
-	 * 线程安全。<br/>
-	 * 查询结果并封装成对象
-	 * @param conn
-	 * @param sql
-	 * @param handler 结果处理器
-	 * @return
-	 * @throws SQLException
-	 */
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> handler) throws SQLException{
-		Statement stm = null;
-		try{
-			stm = conn.createStatement();
-			ResultSet result = stm.executeQuery(sql);
-			
-			return handler.handle(result);
-		} catch(SQLException e) {
-			throw e;
-		} finally {
-			closeStm(stm);
-		}
-	}
-	
-	/**
-	 * 线程安全。<br/>
-	 * 查询结果并封装成对象
-	 * @param conn
-	 * @param beanClass
-	 * @param handler 结果处理器。把查询结果封装成对象
-	 * @param params
-	 * @throws SQLException 
-	 */
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> handler, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return query(conn, sql, handler);
-		
-		PreparedStatement pstm = null;
-		try {
-			pstm = conn.prepareStatement(sql);
-			fillStatement(pstm, params, conn);
-			return handler.handle(pstm.executeQuery());
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -240,7 +195,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public <T> T selectBean(Connection connection, Class<T> beanClass, Map<String, String> columnFieldMap, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectBean(connection, beanClass, columnFieldMap, sql);
+		if(params == null || params.length == 0) {
+			return selectBean(connection, beanClass, columnFieldMap, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -315,7 +272,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public ResultMap selectMap(Connection connection, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectMap(connection, sql);
+		if(params == null || params.length == 0) {
+			return selectMap(connection, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -362,7 +321,9 @@ public final class SQLExecutor  {
 	 * @throws SQLException
 	 */
 	public List<ResultMap> selectResultMapList(Connection connection, String sql, Object... params) throws SQLException{
-		if(params == null || params.length == 0) return selectResultMapList(connection, sql);
+		if(params == null || params.length == 0) {
+			return selectResultMapList(connection, sql);
+		}
 		
 		System.out.println(params.length);
 		
@@ -415,7 +376,9 @@ public final class SQLExecutor  {
 			throw new RuntimeException("keyColumn　can not be empty");
 		}
 		
-		if(params == null || params.length == 0) return selectResultMapMap(connection, keyColumn, sql);
+		if(params == null || params.length == 0) {
+			return selectResultMapMap(connection, keyColumn, sql);
+		}
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
