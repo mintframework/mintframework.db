@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** 
  * sql语句执行器。
@@ -26,6 +28,24 @@ import java.util.Map;
  */
 public final class SQLExecutor  {
 	private static DataConverter<?> converter;
+	
+	private Boolean autoUnderlineToCamelhump = false;
+	
+	/**
+	 * 是否将查询出来的字段名自动有下划线命名，转成驼峰命名
+	 * @return
+	 */
+	public Boolean getAutoUnderlineToCamelhump() {
+		return autoUnderlineToCamelhump;
+	}
+
+	/**
+	 * 是否将查询出来的字段名自动有下划线命名，转成驼峰命名
+	 * @param autoUnderlineToCamelhump
+	 */
+	public void setAutoUnderlineToCamelhump(Boolean autoUnderlineToCamelhump) {
+		this.autoUnderlineToCamelhump = autoUnderlineToCamelhump;
+	}
 	
 	public SQLExecutor(){
 		
@@ -151,13 +171,12 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery();
+			return BeanConverter.toBean(beanClass, result, columnFieldMap);
 		} catch (SQLException e) {
 			throw e;
 		} finally {
 			closeStm(pstm);
 		}
-		
-		return BeanConverter.toBean(beanClass, result, columnFieldMap);
 	}
 	
 	/**
@@ -184,7 +203,6 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(pstm);
 		}
-		
 	}
 	
 	/**
@@ -207,7 +225,6 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(stm);
 		}
-		
 	}
 	
 	/**
@@ -270,8 +287,6 @@ public final class SQLExecutor  {
 		if(params == null || params.length == 0) {
 			return selectResultMapList(connection, sql);
 		}
-		
-		System.out.println(params.length);
 		
 		PreparedStatement pstm = null;
 		ResultSet result = null;
@@ -471,10 +486,18 @@ public final class SQLExecutor  {
 			ResultSetMetaData meta = result.getMetaData();
 			ResultMap map = new ResultMap();
 			
-			for(int i=1,j=meta.getColumnCount(); i<=j; i++){
-				map.put(meta.getColumnName(i), result.getString(i));
+			if(autoUnderlineToCamelhump){
+				List<String> columnMap = autoUnderlineToCamelhump(result.getMetaData());
+				for(int i=1,j=meta.getColumnCount()+1; i<j; i++){
+					map.put(columnMap.get(i-1), result.getString(i));
+				}
+				return map;
+			} else {
+				for(int i=1,j=meta.getColumnCount()+1; i<j; i++){
+					map.put(meta.getColumnName(i), result.getString(i));
+				}
+				return map;
 			}
-			return map;
 		}
 		
 		return null;
@@ -489,17 +512,30 @@ public final class SQLExecutor  {
 	private List<ResultMap> createMapList(ResultSet result) throws SQLException{
 		if(result.next()){
 			ResultSetMetaData meta = result.getMetaData();
-			List<ResultMap> mapList = new ArrayList<ResultMap>();
-			do {
-				ResultMap map = new ResultMap();
-				for(int i=1,j=meta.getColumnCount(); i<=j; i++){
-					map.put(meta.getColumnName(i), result.getString(i));
-				}
-				mapList.add(map);
-				
-			} while(result.next());
 			
-			return mapList;
+			List<ResultMap> mapList = new ArrayList<ResultMap>();
+			if(autoUnderlineToCamelhump){
+				List<String> columnMap = autoUnderlineToCamelhump(result.getMetaData());
+				do {
+					ResultMap map = new ResultMap();
+					for(int i=1,j=meta.getColumnCount(); i<=j; i++){
+						map.put(columnMap.get(i-1), result.getString(i));
+					}
+					mapList.add(map);
+				} while(result.next());
+				
+				return mapList;
+			} else {
+				do {
+					ResultMap map = new ResultMap();
+					for(int i=1,j=meta.getColumnCount(); i<=j; i++){
+						map.put(meta.getColumnName(i), result.getString(i));
+					}
+					mapList.add(map);
+				} while(result.next());
+				
+				return mapList;
+			}
 		}
 		
 		return null;
@@ -525,17 +561,34 @@ public final class SQLExecutor  {
 			
 			Map<String, ResultMap> mapMap = new HashMap<String, ResultMap>();
 			String key;
-			do {
-				ResultMap map = new ResultMap();
-				for(int i=1,j=meta.getColumnCount(); i<=j; i++){
-					key = meta.getColumnName(i);
-					map.put(key, result.getString(i));
-					if(key.equals(keyColumn)){
-						mapMap.put(result.getString(i), map);
+			
+			//是否将查询出来的字段名自动有下划线命名，转成驼峰命名
+			if(autoUnderlineToCamelhump){
+		        keyColumn = getCamelhumpString(keyColumn);
+		        List<String> columnMap = autoUnderlineToCamelhump(result.getMetaData());
+				do {
+					ResultMap map = new ResultMap();
+					for(int i=1,j=meta.getColumnCount(); i<=j; i++){
+						key = columnMap.get(i-1);
+						map.put(key, result.getString(i));
+						if(key.equals(keyColumn)){
+							mapMap.put(result.getString(i), map);
+						}
 					}
-				}
-				
-			} while(result.next());
+				} while(result.next());
+			} else {
+				do {
+					ResultMap map = new ResultMap();
+					for(int i=1,j=meta.getColumnCount(); i<=j; i++){
+						key = meta.getColumnName(i);
+						map.put(key, result.getString(i));
+						if(key.equals(keyColumn)){
+							mapMap.put(result.getString(i), map);
+						}
+					}
+					
+				} while(result.next());
+			}
 			
 			return mapMap;
 		}
@@ -705,5 +758,47 @@ public final class SQLExecutor  {
 
 	protected static void setConverter(DataConverter<?> converter) {
 		SQLExecutor.converter = converter;
+	}
+	
+	//将查询出来的字段名自动有下划线命名，转成驼峰命名
+	private List<String> autoUnderlineToCamelhump(ResultSetMetaData meta) throws SQLException{
+		List<String> columnMap = new ArrayList<String>();
+		Pattern pattern = Pattern.compile("_[a-z]");
+		Matcher matcher;
+		
+		StringBuilder builder = new StringBuilder(30);
+		for(int i=1,j=meta.getColumnCount()+1; i<j; i++){
+			builder.setLength(0);
+			builder.append(meta.getColumnName(i));
+			
+			matcher = pattern.matcher(meta.getColumnName(i));
+			
+			for (int x = 0; matcher.find(); x++) {
+				builder.replace(matcher.start() - x, matcher.end() - x, matcher.group().substring(1).toUpperCase());
+			}
+			
+			if (Character.isUpperCase(builder.charAt(0))) {
+				builder.replace(0, 1, String.valueOf(Character.toLowerCase(builder.charAt(0))));
+			}
+			
+			columnMap.add(builder.toString());
+		}
+		return columnMap;
+	}
+	
+	/**
+	 * @param str
+	 * @return
+	 */
+	private String getCamelhumpString (String str){
+		 Matcher matcher = Pattern.compile("_[a-z]").matcher(str);
+	        StringBuilder builder = new StringBuilder(str);
+	        for (int i = 0; matcher.find(); i++) {
+	            builder.replace(matcher.start() - i, matcher.end() - i, matcher.group().substring(1).toUpperCase());
+	        }
+	        if (Character.isUpperCase(builder.charAt(0))) {
+	            builder.replace(0, 1, String.valueOf(Character.toLowerCase(builder.charAt(0))));
+	        }
+	        return builder.toString();
 	}
 }

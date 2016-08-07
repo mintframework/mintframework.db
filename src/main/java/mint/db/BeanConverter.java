@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** 
  * 结果集到bean的转换器
@@ -33,7 +35,7 @@ public class BeanConverter {
 	 */
 	public static <T> T toBean(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap) throws SQLException {
 		T t = null;
-		
+
 		if(result.next()){
 			t = createBean(beanClass, result, getEffectiveColumn(beanClass, result.getMetaData(), columnFieldMap));
 		}
@@ -111,8 +113,9 @@ public class BeanConverter {
 		SetterInfo[] infos = new SetterInfo[len];
 		String label;
 		SetterInfo info;
+		
 		for(int i=0; i<len; i++){
-			label = metaData.getColumnLabel(i+1);
+			label = metaData.getColumnLabel(i+1).toLowerCase();
 			info = infoMap.get(label);
 			
 			if(info == null && columnFieldMap != null){
@@ -126,6 +129,7 @@ public class BeanConverter {
 	}
 	
 	/**
+	 * 下划线命名风格的column也可以被转化成bean的Property
 	 * @param beanClass
 	 */
 	private static Map<String, SetterInfo> getBeanSetterInfo(Class<?> beanClass) {
@@ -146,15 +150,37 @@ public class BeanConverter {
 		
 		Map<String, SetterInfo> setterInfoMap = new HashMap<String, SetterInfo>();
 		PropertyDescriptor pd;
+		String name;
+		SetterInfo setter;
 		for(int i=0, len=props.length; i<len; i++){
 			pd = props[i];
-			setterInfoMap.put(pd.getDisplayName(), new SetterInfo(pd.getWriteMethod(), pd.getPropertyType()));
+			name = pd.getDisplayName();
+			setter = new SetterInfo(pd.getWriteMethod(), pd.getPropertyType());
+			setterInfoMap.put(name, setter);
+			
+			//下划线命名风格的column也可以被转化成bean的Property
+			setterInfoMap.put(camelhumpToUnderline(name), setter);
 		}
-		
+		//缓存起来
 		setterInfoMapMap.put(beanClass, setterInfoMap);
 		
 		return setterInfoMap;
 	}
+	
+	 /**
+     * 将驼峰风格替换为下划线风格
+     */
+    private static String camelhumpToUnderline(String str) {
+        Matcher matcher = Pattern.compile("[A-Z]").matcher(str);
+        StringBuilder builder = new StringBuilder(str);
+        for (int i = 0; matcher.find(); i++) {
+            builder.replace(matcher.start() + i, matcher.end() + i, "_" + matcher.group().toLowerCase());
+        }
+        if (builder.charAt(0) == '_') {
+            builder.deleteCharAt(0);
+        }
+        return builder.toString();
+    }
 	
 	/**/
 	private static Object processColumn(ResultSet rs, int index, Class<?> fieldType) throws SQLException {
