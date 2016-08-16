@@ -20,5 +20,5 @@ public interface DataConverter<T> {
 	 * @param result
 	 * @return
 	 */
-	public Object ColumnToField(String databaseValue, Class<?> fieldType, String columnType, int columnIndex, ResultSet result);
+	public T ColumnToField(String databaseValue, Class<?> fieldType, String columnType, int columnIndex, ResultSet result);
 }
