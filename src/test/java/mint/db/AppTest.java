@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
 import mint.db.MiniConnectionPool;

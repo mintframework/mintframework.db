@@ -3,8 +3,10 @@ package mint.db;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -81,7 +83,11 @@ public class BeanConverter {
 			for(int i=0,l=infos.length; i<l; i++){
 				info = infos[i];
 				if(info != null){
-					info.method.invoke(t, processColumn(rslt, i+1, info.type));
+					if(info.isSetter){
+						info.method.invoke(t, processColumn(rslt, i+1, info.fieldType));
+					} else {
+						info.field.set(t, processColumn(rslt, i+1, info.fieldType));
+					}
 				}
 			}
 		} catch (InstantiationException e) {
@@ -136,7 +142,9 @@ public class BeanConverter {
 		Map<String, SetterInfo> infoMap = setterInfoMapMap.get(beanClass);
 		
 		if(infoMap != null) return infoMap;
-
+		
+		Map<String, SetterInfo> setterInfoMap = new HashMap<String, SetterInfo>();
+		/*内省方式获取属性和setter*/
 		PropertyDescriptor[] props = null;
 		try {
 			props = Introspector.getBeanInfo(beanClass, Object.class).getPropertyDescriptors();
@@ -144,23 +152,37 @@ public class BeanConverter {
 			e.printStackTrace();
 		}
 		
-		if(props == null || props.length == 0){
-			throw new RuntimeException(beanClass.getName()+" not a bean class");
+		SetterInfo setter;
+		if(props != null && props.length != 0){
+			PropertyDescriptor pd;
+			String name;
+			
+			for(int i=0, len=props.length; i<len; i++){
+				pd = props[i];
+				name = pd.getDisplayName();
+				setter = new SetterInfo(pd.getWriteMethod(), pd.getPropertyType(), null, true);
+				setterInfoMap.put(name, setter);
+				
+				//下划线命名风格的column也可以被转化成bean的Property
+				setterInfoMap.put(camelhumpToUnderline(name), setter);
+			}
 		}
 		
-		Map<String, SetterInfo> setterInfoMap = new HashMap<String, SetterInfo>();
-		PropertyDescriptor pd;
-		String name;
-		SetterInfo setter;
-		for(int i=0, len=props.length; i<len; i++){
-			pd = props[i];
-			name = pd.getDisplayName();
-			setter = new SetterInfo(pd.getWriteMethod(), pd.getPropertyType());
-			setterInfoMap.put(name, setter);
+		//反射获取属性，非final,static,private属性也可以注入
+		for(Field f : beanClass.getFields()){
+			if(Modifier.isFinal(f.getModifiers()) || Modifier.isStatic(f.getModifiers()) || Modifier.isPrivate(f.getModifiers())) continue;
+			
+			if(setterInfoMap.get(f.getName())!=null) continue;
+			
+			setter = new SetterInfo(null, f.getType(), f, false);
+			
+			f.setAccessible(true);
+			setterInfoMap.put(f.getName(),  setter);
 			
 			//下划线命名风格的column也可以被转化成bean的Property
-			setterInfoMap.put(camelhumpToUnderline(name), setter);
+			setterInfoMap.put(camelhumpToUnderline(f.getName()), setter);
 		}
+		
 		//缓存起来
 		setterInfoMapMap.put(beanClass, setterInfoMap);
 		
@@ -232,11 +254,15 @@ public class BeanConverter {
  * d
  */
 class SetterInfo {
-	Method method;
-	Class<?> type;
+	public final Method 	method;
+	public final Class<?> 	fieldType;
+	public final Boolean 	isSetter;
+	public final Field		field;
 	
-	SetterInfo(Method method, Class<?> type){
+	SetterInfo(Method method, Class<?> type, Field field, Boolean isSetter){
 		this.method = method;
-		this.type = type;
+		this.fieldType = type;
+		this.isSetter = isSetter;
+		this.field = field;
 	}
 }
