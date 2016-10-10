@@ -238,7 +238,7 @@ public class BeanConverter {
 			return Byte.valueOf(rs.getByte(index));
 		
 		} else if(dataConverter != null){
-			return dataConverter.ColumnToField(rs.getString(index), fieldType, rs.getMetaData().getColumnTypeName(index), index, rs);
+			return dataConverter.ColumnToField(rs.getString(index), fieldType, rs.getMetaData().getColumnTypeName(index));
 		} else {
 			return rs.getObject(index);
 		}

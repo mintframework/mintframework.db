@@ -634,7 +634,7 @@ public final class SQLExecutor  {
 				return (T) Byte.valueOf(result.getByte(1));
 			
 			} else if(DataConverterProvider.getConverter() != null){
-				return (T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1), 1, result);
+				return (T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1));
 			} else {
 				return (T) result.getObject(1);
 			}
@@ -693,7 +693,7 @@ public final class SQLExecutor  {
 			
 			} else if(DataConverterProvider.getConverter() != null){
 				do {
-					ts.add((T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1), 1, result));
+					ts.add((T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1)));
 				} while(result.next());
 			} else {
 				do {
@@ -743,7 +743,7 @@ public final class SQLExecutor  {
 				pstm.setShort(i+1, (short) value);
 				
 			} else if(converter != null){
-				pstm.setObject(i+1, converter.fieldToColumn(value, connection));
+				pstm.setObject(i+1, converter.fieldToColumn(value));
 				
 			} else {
 				pstm.setObject(i+1, value);
