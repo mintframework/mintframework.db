@@ -251,7 +251,6 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(pstm);
 		}
-		
 	}
 	
 	/**
@@ -494,7 +493,7 @@ public final class SQLExecutor  {
 				return map;
 			} else {
 				for(int i=1,j=meta.getColumnCount()+1; i<j; i++){
-					map.put(meta.getColumnName(i), result.getString(i));
+					map.put(meta.getColumnLabel(i), result.getString(i));
 				}
 				return map;
 			}
@@ -769,9 +768,9 @@ public final class SQLExecutor  {
 		StringBuilder builder = new StringBuilder(30);
 		for(int i=1,j=meta.getColumnCount()+1; i<j; i++){
 			builder.setLength(0);
-			builder.append(meta.getColumnName(i));
+			builder.append(meta.getColumnLabel(i));
 			
-			matcher = pattern.matcher(meta.getColumnName(i));
+			matcher = pattern.matcher(meta.getColumnLabel(i));
 			
 			for (int x = 0; matcher.find(); x++) {
 				builder.replace(matcher.start() - x, matcher.end() - x, matcher.group().substring(1).toUpperCase());
