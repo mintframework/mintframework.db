@@ -718,8 +718,8 @@ public final class SQLExecutor  {
 		for(int i=0, len=params.length; i<len; i++){
 			value = params[i];
 			
-			if(value instanceof String){
-				pstm.setString(i+1, (String) value);
+			if(value instanceof String || value instanceof Enum){
+				pstm.setString(i+1, value.toString());
 			} else if(value instanceof Integer) {
 				pstm.setInt(i+1, (int) value);
 				
