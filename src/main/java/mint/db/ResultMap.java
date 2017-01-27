@@ -2,60 +2,60 @@ package mint.db;
 
 import java.util.HashMap;
 
-public class ResultMap extends HashMap<String, String> {
+public class ResultMap extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
 
 	public Integer getInteger(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return Integer.valueOf(this.get(key));
+			return Integer.valueOf(value);
 		}
 	}
 	
 	public Long getLong(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return Long.valueOf(this.get(key));
+			return Long.valueOf(value);
 		}
 	}
 	
 	public Float getFloat(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return Float.valueOf(this.get(key));
+			return Float.valueOf(value);
 		}
 	}
 	
 	public Double getDouble(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return Double.valueOf(this.get(key));
+			return Double.valueOf(value);
 		}
 	}
 	
 	public Short getChar(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return Short.valueOf(this.get(key));
+			return Short.valueOf(value);
 		}
 	}
 	
 	public Boolean getBoolean(String key){
-		String value = this.get(key);
+		String value = (String) this.get(key);
 		if(value==null){
 			return null;
 		} else {
-			return  Boolean.valueOf(this.get(key));
+			return  Boolean.valueOf(value);
 		}
 	}
 }
