@@ -631,7 +631,10 @@ public final class SQLExecutor  {
 			
 			} else if (type.equals(Byte.TYPE) || type.equals(Byte.class)) {
 				return (T) Byte.valueOf(result.getByte(1));
-			
+				
+			} else if(type.isEnum()){
+				return (T) BeanConverter.initEnum(result.getString(1), type);
+				
 			} else if(DataConverterProvider.getConverter() != null){
 				return (T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1));
 			} else {

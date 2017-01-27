@@ -26,7 +26,10 @@ import java.util.regex.Pattern;
 public class BeanConverter {
 	private static DataConverter<?> dataConverter = null;
 	
-	private static final Map<Class<?>, Map<String, SetterInfo>> setterInfoMapMap = new HashMap<Class<?>, Map<String, SetterInfo>>(); 
+	private static final Map<Class<?>, Map<String, SetterInfo>> setterInfoMapMap = new HashMap<Class<?>, Map<String, SetterInfo>>();
+	
+	private static final Pattern enumValuePattern = Pattern.compile("^\\d+$");
+	
 	/**
 	 * 将结果集的第一列转化成bean
 	 * @param beanClass 
@@ -236,9 +239,13 @@ public class BeanConverter {
 			
 		} else if (fieldType.equals(Byte.TYPE) || fieldType.equals(Byte.class)) {
 			return Byte.valueOf(rs.getByte(index));
-		
+			
+		} else if(fieldType.isEnum()){
+			return initEnum(rs.getString(index), fieldType);
+			
 		} else if(dataConverter != null){
 			return dataConverter.ColumnToField(rs.getString(index), fieldType, rs.getMetaData().getColumnTypeName(index));
+			
 		} else {
 			return rs.getObject(index);
 		}
@@ -246,6 +253,43 @@ public class BeanConverter {
 
 	protected static void setDataConverter(DataConverter<?> dataConverter) {
 		BeanConverter.dataConverter = dataConverter;
+	}
+	
+	/**
+	 * 初始化枚举参数
+	 * @param value
+	 * @param enumOrdinals
+	 * @param enumNames
+	 * @param argType
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	static Enum<?> initEnum(String value, Class<?> argType){
+		Enum<?> es[] = ((Class<? extends Enum>)argType).getEnumConstants();
+		if(es!=null){
+			List<Integer> enumOrdinals = new ArrayList<>();
+			List<String> enumNames = new ArrayList<>();
+			
+			for(Enum<?> e : es){
+				enumOrdinals.add(e.ordinal());
+				enumNames.add(e.name());
+			}
+			
+			//索引方式初始化枚举
+			if(enumValuePattern.matcher(value).matches()){
+				int val = Integer.valueOf(value);
+				
+				if(enumOrdinals.indexOf(val)>-1){
+					value = enumNames.get(val);
+					return Enum.valueOf((Class<? extends Enum>)argType, value);
+				}
+			} else if(enumNames.indexOf(value) > -1){ //字符串方式初始化枚举
+				return Enum.valueOf((Class<? extends Enum>)argType, value);
+			}
+		}
+		
+		
+		return null;
 	}
 }
 
