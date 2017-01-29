@@ -162,12 +162,15 @@ public class BeanConverter {
 			
 			for(int i=0, len=props.length; i<len; i++){
 				pd = props[i];
-				name = pd.getDisplayName();
-				setter = new SetterInfo(pd.getWriteMethod(), pd.getPropertyType(), null, true);
-				setterInfoMap.put(name, setter);
 				
-				//下划线命名风格的column也可以被转化成bean的Property
-				setterInfoMap.put(camelhumpToUnderline(name), setter);
+				if(pd.getWriteMethod()!=null){
+					name = pd.getDisplayName();
+					setter = new SetterInfo(pd.getWriteMethod(), pd.getPropertyType(), null, true);
+					setterInfoMap.put(name, setter);
+					
+					//下划线命名风格的column也可以被转化成bean的Property
+					setterInfoMap.put(camelhumpToUnderline(name), setter);
+				}
 			}
 		}
 		
