@@ -1,4 +1,4 @@
-package mint.db;
+package org.mintframework.db;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 /** 
  * 结果集到bean的转换器
- * @author LiangWei(895925636@qq.com)
+ * @author LiangWei(cnliangwei@foxmail.com)
  * @date 2015年3月13日 下午9:41:31 
  *  
  */

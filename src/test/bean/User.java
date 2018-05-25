@@ -1,4 +1,4 @@
-package mint.db.bean;
+package org.mintframework.db.bean;
 
 public class User extends People{
 	private String username;

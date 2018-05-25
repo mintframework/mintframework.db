@@ -1,4 +1,4 @@
-package mint.db;
+package org.mintframework.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * sql语句执行器。
  * SQLRunner用到的所有 Connection都要使用者自己关闭，否则资源无法释放。<br/>
  * 本类中，除了构造方法外，所有不带connection的方法都是非线程安全的；所有带有connection的方法都是线程安全的
- * @author LiangWei(895925636@qq.com)
+ * @author LiangWei(cnliangwei@foxmail.com)
  * @date 2015年3月13日 下午9:42:05 
  *  
  */

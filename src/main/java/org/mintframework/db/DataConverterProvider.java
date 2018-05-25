@@ -1,4 +1,4 @@
-package mint.db;
+package org.mintframework.db;
 
 
 /**

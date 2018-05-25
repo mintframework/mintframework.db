@@ -1,4 +1,4 @@
-package mint.db;
+package org.mintframework.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+import org.mintframework.db.MiniConnectionPool;
+import org.mintframework.db.SQLExecutor;
+import org.mintframework.db.Transaction;
+import org.mintframework.db.bean.User;
 
-import mint.db.MiniConnectionPool;
-import mint.db.SQLExecutor;
-import mint.db.Transaction;
-import mint.db.bean.User;
+import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
 public class AppTest {
 	private static MiniConnectionPool connectionPool;

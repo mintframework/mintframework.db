@@ -11,7 +11,7 @@
 // Please contact the author if you need another license.
 // This module is provided "as is", without warranties of any kind.
 
-package mint.db;
+package org.mintframework.db;
 
 import java.io.PrintWriter;
 import java.sql.Connection;

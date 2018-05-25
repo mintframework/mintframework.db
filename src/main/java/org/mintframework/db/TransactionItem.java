@@ -1,9 +1,9 @@
-package mint.db;
+package org.mintframework.db;
 
 /** 
  *  封装事务处理操作，包括sql语句和执行参数。
  * 配合<code>TransactionService</code>使用
- * @author LiangWei(895925636@qq.com)
+ * @author LiangWei(cnliangwei@foxmail.com)
  * @date 2015年3月13日 下午9:42:27 
  *  
  */

@@ -1,4 +1,4 @@
-package mint.db.bean;
+package org.mintframework.db.bean;
 
 public class People {
 	private Long id;

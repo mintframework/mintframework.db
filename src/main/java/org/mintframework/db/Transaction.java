@@ -1,4 +1,4 @@
-package mint.db;
+package org.mintframework.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,7 +7,7 @@ import java.util.List;
 
 /** 
  * 事务支持的封装
- * @author LiangWei(895925636@qq.com)
+ * @author LiangWei(cnliangwei@foxmail.com)
  * @date 2015年3月13日 下午9:42:43 
  *  
  */
