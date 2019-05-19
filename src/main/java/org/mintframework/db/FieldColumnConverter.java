@@ -1,6 +1,6 @@
 package org.mintframework.db;
 
-public interface DataConverter<T> {
+public interface FieldColumnConverter<T> {
 	/**
 	 * 将bean的field值序列化成数据库column的值
 	 * @param fieldValue

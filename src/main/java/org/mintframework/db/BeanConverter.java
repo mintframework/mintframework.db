@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
  *  
  */
 public class BeanConverter {
-	private static DataConverter<?> dataConverter = null;
-	
 	private static final Map<Class<?>, Map<String, SetterInfo>> setterInfoMapMap = new HashMap<Class<?>, Map<String, SetterInfo>>();
 	
 	private static final Pattern enumValuePattern = Pattern.compile("^\\d+$");
@@ -38,11 +36,11 @@ public class BeanConverter {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static <T> T toBean(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap) throws SQLException {
+	public static <T> T toBean(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap, FieldColumnConverter<?> converter) throws SQLException {
 		T t = null;
 
 		if(result.next()){
-			t = createBean(beanClass, result, getEffectiveColumn(beanClass, result.getMetaData(), columnFieldMap));
+			t = createBean(beanClass, result, getEffectiveColumn(beanClass, result.getMetaData(), columnFieldMap), converter);
 		}
 		
 		return t;
@@ -57,13 +55,13 @@ public class BeanConverter {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static <T> List<T> toBeanList(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap) throws SQLException{
+	public static <T> List<T> toBeanList(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap, FieldColumnConverter<?> converter) throws SQLException{
 		List<T> beanList = new ArrayList<T>();
 		
 		if(result.next()){
 			SetterInfo[] infos = getEffectiveColumn(beanClass, result.getMetaData(), columnFieldMap);
 			do{
-				beanList.add(createBean(beanClass, result, infos));
+				beanList.add(createBean(beanClass, result, infos, converter));
 			} while(result.next());
 		}
 		
@@ -78,18 +76,18 @@ public class BeanConverter {
 	 * @return
 	 * @throws SQLException
 	 */
-	private static <T> T createBean(Class<T> claz,ResultSet rslt, SetterInfo[] infos) throws SQLException{
+	private static <T> T createBean(Class<T> claz,ResultSet rslt, SetterInfo[] infos, FieldColumnConverter<?> converter) throws SQLException{
 		T t = null;
 		try {
-			t = claz.newInstance();
+			t = claz.getDeclaredConstructor().newInstance();
 			SetterInfo info;
 			for(int i=0,l=infos.length; i<l; i++){
 				info = infos[i];
 				if(info != null){
 					if(info.isSetter){
-						info.method.invoke(t, processColumn(rslt, i+1, info.fieldType));
+						info.method.invoke(t, processColumn(rslt, i+1, info.fieldType, converter));
 					} else {
-						info.field.set(t, processColumn(rslt, i+1, info.fieldType));
+						info.field.set(t, processColumn(rslt, i+1, info.fieldType, converter));
 					}
 				}
 			}
@@ -98,6 +96,10 @@ public class BeanConverter {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
 		
@@ -125,6 +127,7 @@ public class BeanConverter {
 		
 		for(int i=0; i<len; i++){
 			label = metaData.getColumnLabel(i+1).toLowerCase();
+			
 			info = infoMap.get(label);
 			
 			if(info == null && columnFieldMap != null){
@@ -196,7 +199,7 @@ public class BeanConverter {
 	}
 	
 	 /**
-     * 将驼峰风格替换为下划线风格
+	  * 将驼峰风格替换为下划线风格
      */
     private static String camelhumpToUnderline(String str) {
         Matcher matcher = Pattern.compile("[A-Z]").matcher(str);
@@ -210,8 +213,15 @@ public class BeanConverter {
         return builder.toString();
     }
 	
-	/**/
-	private static Object processColumn(ResultSet rs, int index, Class<?> fieldType) throws SQLException {
+	/**
+	 * 
+	 * @param rs
+	 * @param index
+	 * @param fieldType
+	 * @return
+	 * @throws SQLException
+	 */
+	private static Object processColumn(ResultSet rs, int index, Class<?> fieldType, FieldColumnConverter<?> dataConverter) throws SQLException {
 		if ( !fieldType.isPrimitive() && rs.getObject(index) == null ) {
 			return null;
 		}
@@ -254,10 +264,6 @@ public class BeanConverter {
 		}
 	}
 
-	protected static void setDataConverter(DataConverter<?> dataConverter) {
-		BeanConverter.dataConverter = dataConverter;
-	}
-	
 	/**
 	 * 初始化枚举参数
 	 * @param value

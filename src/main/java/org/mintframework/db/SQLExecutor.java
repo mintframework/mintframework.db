@@ -27,8 +27,16 @@ import java.util.regex.Pattern;
  *
  */
 public final class SQLExecutor  {
-	private static DataConverter<?> converter;
+	private FieldColumnConverter<?> converter;
 	
+	public FieldColumnConverter<?> getConverter() {
+		return converter;
+	}
+
+	public void setConverter(FieldColumnConverter<?> converter) {
+		this.converter = converter;
+	}
+
 	private Boolean autoUnderlineToCamelhump = false;
 	
 	/**
@@ -49,6 +57,10 @@ public final class SQLExecutor  {
 	
 	public SQLExecutor(){
 		
+	}
+	
+	public SQLExecutor(FieldColumnConverter<?> converter){
+		this.converter = converter;
 	}
 	
 	/**
@@ -75,6 +87,40 @@ public final class SQLExecutor  {
 			}
 			
 			return pstm.executeBatch();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			closeStm(pstm);
+		}
+	}
+	
+	/**
+	 * 线程安全。<br/>
+	 * 批量执行sql语句。一般用来执行insert、update、create等语句，而不执行select 语句
+	 * @param conn
+	 * @param sql
+	 * @param params 必须是二维数组
+	 * @return
+	 * @throws SQLException
+	 */
+	public void batch(Connection conn, String[] sqls, Object[][] params) throws SQLException{
+		if(params == null || params.length == 0 || sqls == null || sqls.length == 0 || !(params instanceof Object[][]) || (params instanceof Object[][][]) ){
+			throw new SQLException("invalidate params:"+params);
+		}
+		
+		if(sqls.length != params.length) {
+			throw new RuntimeException("sqls count donot match params count");
+		}
+		
+		PreparedStatement pstm = null;
+		try {
+			int index = 0;
+			for(String sql : sqls) {
+				pstm = conn.prepareStatement(sql);
+				fillStatement(pstm, params[index], conn);
+				pstm.execute();
+				index++;
+			}
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -143,7 +189,7 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
-			return BeanConverter.toBean(beanClass, result, columnFieldMap);
+			return BeanConverter.toBean(beanClass, result, columnFieldMap, this.converter);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
@@ -171,7 +217,7 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery();
-			return BeanConverter.toBean(beanClass, result, columnFieldMap);
+			return BeanConverter.toBean(beanClass, result, columnFieldMap, converter);
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -197,7 +243,7 @@ public final class SQLExecutor  {
 			pstm = connection.prepareStatement(sql);
 			fillStatement(pstm, params, connection);
 			result = pstm.executeQuery();
-			return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
+			return BeanConverter.toBeanList(beanClass, result, columnFieldMap, converter);
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -219,7 +265,7 @@ public final class SQLExecutor  {
 		try{
 			stm = connection.createStatement();
 			result = stm.executeQuery(sql);
-			return BeanConverter.toBeanList(beanClass, result, columnFieldMap);
+			return BeanConverter.toBeanList(beanClass, result, columnFieldMap, converter);
 		} catch(SQLException e) {
 			throw e;
 		} finally {
@@ -635,8 +681,8 @@ public final class SQLExecutor  {
 			} else if(type.isEnum()){
 				return (T) BeanConverter.initEnum(result.getString(1), type);
 				
-			} else if(DataConverterProvider.getConverter() != null){
-				return (T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1));
+			} else if(this.converter != null){
+				return (T) this.converter.ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1));
 			} else {
 				return (T) result.getObject(1);
 			}
@@ -693,9 +739,9 @@ public final class SQLExecutor  {
 					ts.add((T) Byte.valueOf(result.getByte(1)));
 				} while(result.next());
 			
-			} else if(DataConverterProvider.getConverter() != null){
+			} else if(this.converter != null){
 				do {
-					ts.add((T) DataConverterProvider.getConverter().ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1)));
+					ts.add((T) this.converter.ColumnToField(result.getString(1), type, result.getMetaData().getColumnTypeName(1)));
 				} while(result.next());
 			} else {
 				do {
@@ -758,10 +804,6 @@ public final class SQLExecutor  {
 		stm.close();
 	}
 
-	protected static void setConverter(DataConverter<?> converter) {
-		SQLExecutor.converter = converter;
-	}
-	
 	//将查询出来的字段名自动有下划线命名，转成驼峰命名
 	private List<String> autoUnderlineToCamelhump(ResultSetMetaData meta) throws SQLException{
 		List<String> columnMap = new ArrayList<String>();

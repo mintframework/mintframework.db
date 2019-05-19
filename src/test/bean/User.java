@@ -29,5 +29,4 @@ public class User extends People{
 	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
 	}
-	
 }
