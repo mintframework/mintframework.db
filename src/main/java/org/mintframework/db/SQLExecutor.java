@@ -767,7 +767,7 @@ public final class SQLExecutor  {
 		for(int i=0, len=params.length; i<len; i++){
 			value = params[i];
 			
-			if(value instanceof String || value instanceof Enum){
+			if(value instanceof String){
 				pstm.setString(i+1, value.toString());
 			} else if(value instanceof Integer) {
 				pstm.setInt(i+1, (int) value);
@@ -789,6 +789,9 @@ public final class SQLExecutor  {
 				
 			} else if(value instanceof Byte){
 				pstm.setShort(i+1, (short) value);
+				
+			} else if(value instanceof Enum) {
+				pstm.setObject(i+1, ((Enum<?>) value).ordinal());
 				
 			} else if(converter != null){
 				pstm.setObject(i+1, converter.fieldToColumn(value));

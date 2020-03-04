@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -255,6 +256,9 @@ public class BeanConverter {
 			
 		} else if(fieldType.isEnum()){
 			return initEnum(rs.getString(index), fieldType);
+			
+		} else if(fieldType.equals(BigDecimal.class)){
+			return BigDecimal.valueOf(rs.getDouble(index));
 			
 		} else if(dataConverter != null){
 			return dataConverter.ColumnToField(rs.getString(index), fieldType, rs.getMetaData().getColumnTypeName(index));
