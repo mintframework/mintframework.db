@@ -21,7 +21,7 @@ public class AppTest {
 		MysqlConnectionPoolDataSource dataSource;
 		dataSource = new MysqlConnectionPoolDataSource();
 		dataSource.setUser("root");
-		dataSource.setPassword("root");
+		dataSource.setPassword("123root");
 		dataSource.setServerName("localhost");
 		dataSource.setPort(3306);
 		dataSource.setDatabaseName("jdbc");
@@ -35,7 +35,6 @@ public class AppTest {
 	 */
 	public void insert() throws SQLException{
 		Connection connection = connectionPool.getConnection();
-		
 		SQLExecutor runner = new SQLExecutor();
 		String sql = "insert into user(id, username, password, update_time) values(?,?,?,?)";
 		runner.update(connection, sql, 1, "水牛叔叔", "nooneknows", new Date().getTime());
@@ -116,10 +115,8 @@ public class AppTest {
 		Transaction trans = Transaction.startTransaction(conn);
 		
 		/*addItem采用动态参数*/
-		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 5, "郑海英", 25);
-		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 6, "卓琼羽", 23);
-		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 7, "邱露", 23);
-		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 8, "张洁", 23);
+		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 5, "小惠", 25);
+		trans.addItem("insert into user (id, username, age) values (?, ?, ?)", 5, "xiaohui", 25);
 		
 		trans.commit();
 		trans.close();

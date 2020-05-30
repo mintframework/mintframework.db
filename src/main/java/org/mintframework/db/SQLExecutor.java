@@ -1,5 +1,6 @@
 package org.mintframework.db;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -425,6 +426,7 @@ public final class SQLExecutor  {
 	}
 	
 	/**
+	 * 将查询结果封装成数值返回。支持基础类型和枚举类型
 	 * @param connection
 	 * @param clazz
 	 * @param sql
@@ -789,6 +791,9 @@ public final class SQLExecutor  {
 				
 			} else if(value instanceof Byte){
 				pstm.setShort(i+1, (short) value);
+				
+			} else if(value instanceof Array){
+				pstm.setArray(i+1, (Array) value);
 				
 			} else if(value instanceof Enum) {
 				pstm.setObject(i+1, ((Enum<?>) value).ordinal());
