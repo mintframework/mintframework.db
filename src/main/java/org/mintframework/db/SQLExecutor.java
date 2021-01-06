@@ -232,7 +232,7 @@ public final class SQLExecutor  {
 	 * @param columnFieldMap
 	 * @param sql
 	 * @param params
-	 * @return
+	 * @return 没有数据则返回空列表
 	 * @throws SQLException
 	 */
 	public <T> List<T> selectBeanList(Connection connection, Class<T> beanClass, Map<String, String> columnFieldMap, String sql, Object... params) throws SQLException{
@@ -257,7 +257,7 @@ public final class SQLExecutor  {
 	 * @param beanClass
 	 * @param columnFieldMap
 	 * @param sql
-	 * @return
+	 * @return 没有数据则返回空列表
 	 * @throws SQLException
 	 */
 	public <T> List<T> selectBeanList(Connection connection, Class<T> beanClass, Map<String, String> columnFieldMap, String sql) throws SQLException{
@@ -326,7 +326,7 @@ public final class SQLExecutor  {
 	 * @param connection
 	 * @param sql
 	 * @param params
-	 * @return
+	 * @return 无数据返回空列表
 	 * @throws SQLException
 	 */
 	public List<ResultMap> selectResultMapList(Connection connection, String sql, Object... params) throws SQLException{
@@ -353,7 +353,7 @@ public final class SQLExecutor  {
 	/**
 	 * @param connection
 	 * @param sql
-	 * @return
+	 * @return 没有数据返回空列表
 	 * @throws SQLException
 	 */
 	public List<ResultMap> selectResultMapList(Connection connection, String sql) throws SQLException{
@@ -479,7 +479,7 @@ public final class SQLExecutor  {
 	 * @param clazz
 	 * @param sql
 	 * @param params
-	 * @return
+	 * @return 没有数据返回空列表
 	 * @throws SQLException
 	 */
 	public <T> List<T> selectScalarList(Connection connection, Class<T> clazz, String sql, Object... params) throws SQLException{
@@ -498,14 +498,13 @@ public final class SQLExecutor  {
 		} finally {
 			closeStm(pstm);
 		}
-		
 	}
 	
 	/**
 	 * @param connection
 	 * @param clazz
 	 * @param sql
-	 * @return
+	 * @return 没有数据则返回空列表
 	 * @throws SQLException
 	 */
 	public <T> List<T> selectScalarList(Connection connection, Class<T> clazz, String sql) throws SQLException{
@@ -585,7 +584,7 @@ public final class SQLExecutor  {
 			}
 		}
 		
-		return null;
+		return new ArrayList<ResultMap>();
 	}
 	
 	/**
@@ -695,7 +694,7 @@ public final class SQLExecutor  {
 	/**
 	 * @param type
 	 * @param result
-	 * @return
+	 * @return 没有数据返回空列表
 	 * @throws SQLException
 	 */
 	@SuppressWarnings("unchecked")
@@ -753,7 +752,7 @@ public final class SQLExecutor  {
 			return ts;
 		}
 		
-		return null;
+		return new LinkedList<T>();
 	}
 
 	/**

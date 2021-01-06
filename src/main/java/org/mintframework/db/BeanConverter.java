@@ -53,7 +53,7 @@ public class BeanConverter {
 	 * @param beanClass
 	 * @param result
 	 * @param columnFieldMap 数据库列名和bean字段名的对应关系
-	 * @return
+	 * @return 没有数据返回空列表
 	 * @throws SQLException 
 	 */
 	public static <T> List<T> toBeanList(Class<T> beanClass, ResultSet result, Map<String, String> columnFieldMap, FieldColumnConverter<?> converter) throws SQLException{
